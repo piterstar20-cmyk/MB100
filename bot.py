@@ -6,7 +6,7 @@ import asyncio
 app = FastAPI()
 
 # --- Stores the last number received from Telegram ---
-last_number = "null"
+last_number = "9800"
 
 BOT_TOKEN = "8208471979:AAHXGkqSG1B2tfH_kwVv_evwKNxjhItV_K4"
 
@@ -47,5 +47,6 @@ async def start_bot():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(start_bot())
+
 
 
