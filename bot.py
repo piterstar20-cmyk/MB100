@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Request
 from telegram import Update, Bot
-from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
+from telegram.ext import ContextTypes, MessageHandler, filters
 import os
 import asyncio
 
@@ -10,8 +10,12 @@ app = FastAPI()
 last_number = "null"
 
 # --- Load bot token and webhook URL from environment variables ---
-BOT_TOKEN = os.environ.get("BOT_TOKEN")  # Set this in Render environment
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")  # Example: https://yourapp.onrender.com/telegram_webhook
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
+
+# Validate environment variables
+if not BOT_TOKEN or not WEBHOOK_URL:
+    raise ValueError("BOT_TOKEN and WEBHOOK_URL must be set as environment variables.")
 
 bot = Bot(token=BOT_TOKEN)
 
@@ -38,10 +42,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 @app.post("/telegram_webhook")
 async def telegram_webhook(req: Request):
     update = Update.de_json(await req.json(), bot)
-    app_bot = ApplicationBuilder().token(BOT_TOKEN).build()
-    app_bot.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    
-    # Process the update
     await handle_message(update, ContextTypes.DEFAULT_TYPE())
     return {"ok": True}
 
