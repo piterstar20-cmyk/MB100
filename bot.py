@@ -8,7 +8,7 @@ app = FastAPI()
 # --- Stores the last number received from Telegram ---
 last_number = "null"
 
-BOT_TOKEN = "8208471979:AAHXGGkqSG1B2tfH_kwVv_evwKNxjhItV_K4"
+BOT_TOKEN = "8208471979:AAHXGkqSG1B2tfH_kwVv_evwKNxjhItV_K4"
 
 
 # --- API endpoint for ESP32 ---
@@ -47,3 +47,4 @@ async def start_bot():
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(start_bot())
+
