@@ -9,7 +9,7 @@ app = FastAPI()
 last_number = "null"
 
 # --- Directly set your bot token and webhook URL here ---
-BOT_TOKEN = "8495622135:AAEdNbSZIMU4noEWmsGDmwshQarU"
+BOT_TOKEN = "8495622135:AAEdNbSZIMU4nOEWmsGDmwshQarU"
 WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"
 
 bot = Bot(token=BOT_TOKEN)
@@ -45,4 +45,5 @@ async def telegram_webhook(req: Request):
 async def startup_event():
     await bot.set_webhook(WEBHOOK_URL)
     print(f"Webhook set to: {WEBHOOK_URL}")
+
 
