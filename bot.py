@@ -37,14 +37,15 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def start_bot():
     app_bot = ApplicationBuilder().token(BOT_TOKEN).build()
     app_bot.add_handler(MessageHandler(filters.TEXT, handle_message))
+    
+    # در نسخه 20+ همین کافی است:
+    await app_bot.run_polling()
 
-    await app_bot.initialize()
-    await app_bot.start()
-    await app_bot.updater.start_polling()
 
 
 # --- FastAPI startup event ---
 @app.on_event("startup")
 async def startup_event():
     asyncio.create_task(start_bot())
+
 
