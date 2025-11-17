@@ -31,11 +31,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def telegram_webhook(request: Request):
     data = await request.json()
     update = Update.de_json(data, application.bot)
-    await application.update_queue.put(update)  # اضافه کردن Update به صف Application
+    await application.update_queue.put(update)
     return "ok"
 
 # ساخت Application تلگرام
-application = ApplicationBuilder().token(BOT_TOKEN).webhook_url(WEBHOOK_URL).build()
+application = ApplicationBuilder().token(BOT_TOKEN).build()
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
 # هنگام استارت FastAPI، Webhook را ست می‌کنیم
@@ -43,5 +43,5 @@ application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle
 async def on_startup():
     await application.initialize()
     await application.start()
+    # ست کردن Webhook
     await application.bot.set_webhook(WEBHOOK_URL)
-
