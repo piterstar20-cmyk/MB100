@@ -13,7 +13,7 @@ app = FastAPI()
 bot = Bot(token=BOT_TOKEN)
 
 # عدد آخر برای Arduino
-last_number = "9800"
+last_number = ""
 
 # ===== مسیر Arduino =====
 @app.get("/get_number")
@@ -35,7 +35,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if text.isdigit() and len(text) == 4:
         last_number = text
-        await update.message.reply_text(f"✔️ Number saved: {text}")
+        await update.message.reply_text(f"✔️ دستور شما دریافت و اجرا شد: {text}")
     else:
         await update.message.reply_text("❌ Please send a 4-digit number.")
 
@@ -55,3 +55,4 @@ async def start_telegram_bot():
     import asyncio
     asyncio.create_task(application.initialize())
     asyncio.create_task(application.start())
+
