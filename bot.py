@@ -15,18 +15,17 @@ last_number = "9800"
 async def get_number():
     return JSONResponse(content={"number": last_number})
 
-# مدیریت پیام های تلگرام
+# مدیریت پیام‌ها
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global last_number
     text = update.message.text
-
     if text.isdigit() and len(text) == 4:
         last_number = text
         await update.message.reply_text(f"✔️ Number saved: {text}")
     else:
         await update.message.reply_text("❌ Please send a 4-digit number.")
 
-# مسیر Webhook تلگرام
+# مسیر webhook تلگرام
 @app.post("/telegram_webhook")
 async def telegram_webhook(request: Request):
     data = await request.json()
@@ -43,5 +42,4 @@ application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle
 async def on_startup():
     await application.initialize()
     await application.start()
-    # ست کردن Webhook
     await application.bot.set_webhook(WEBHOOK_URL)
