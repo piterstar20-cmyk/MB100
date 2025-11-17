@@ -13,7 +13,7 @@ app = FastAPI()
 bot = Bot(token=BOT_TOKEN)
 
 # متغیر ذخیره عدد
-last_number = ""
+last_number = "5000"
 
 # ===== مسیر برای آردوینو =====
 @app.get("/get_number")
@@ -48,4 +48,5 @@ application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle
 async def on_startup():
     # ست کردن webhook
     await bot.set_webhook(WEBHOOK_URL)
+
 
