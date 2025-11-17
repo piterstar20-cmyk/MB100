@@ -1,60 +1,50 @@
+# bot.py
 from fastapi import FastAPI, Request
-from telegram import Update
-from telegram.ext import ApplicationBuilder, MessageHandler, filters
+from fastapi.responses import JSONResponse
+from telegram import Update, Bot
+from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
-# -------------------------
-# تنظیمات
-# -------------------------
+# ====== تنظیمات ======
 BOT_TOKEN = "8495622135:AAEdNbSZIMU4nOlAEKCtCEWmsGDmwshQarU"
-WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"  # وبهوک واقعی خودتان
+WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"  # لینک برنامه شما روی Render
+# ====================
 
-# متغیر برای ذخیره آخرین شماره
-last_number = "null"
-
-# -------------------------
-# ایجاد FastAPI و Bot
-# -------------------------
 app = FastAPI()
-application = ApplicationBuilder().token(BOT_TOKEN).build()
+bot = Bot(token=BOT_TOKEN)
 
-# -------------------------
-# هندلر پیام
-# -------------------------
-async def handle_message(update: Update, context):
-    global last_number
-    text = update.message.text.strip()
+# متغیر ذخیره عدد
+last_number = "9800"
 
-    if not text.isdigit() or len(text) != 4:
-        await update.message.reply_text("⚠️ Please send a 4-digit number only.")
-        return
+# ===== مسیر برای آردوینو =====
+@app.get("/get_number")
+async def get_number():
+    return JSONResponse(content={"number": last_number})
 
-    last_number = text
-    await update.message.reply_text(f"✔️ Number {text} saved. ESP32 can fetch it now.")
-
-# -------------------------
-# وبهوک FastAPI
-# -------------------------
+# ===== مسیر webhook تلگرام =====
 @app.post("/telegram_webhook")
 async def telegram_webhook(request: Request):
     data = await request.json()
-    update = Update.de_json(data, application.bot)
-    await application.update_queue.put(update)
-    return {"ok": True}
+    update = Update.de_json(data, bot)
+    await handle_message(update, ContextTypes.DEFAULT_TYPE(application=None))
+    return "ok"
 
-# -------------------------
-# API برای ESP32
-# -------------------------
-@app.get("/get_number")
-def get_number():
+# ===== مدیریت پیام های دریافتی =====
+async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global last_number
-    return {"number": last_number}
+    text = update.message.text
 
-# -------------------------
-# رویداد startup
-# -------------------------
+    if text.isdigit() and len(text) == 4:
+        last_number = text
+        await update.message.reply_text(f"✔️ Number saved: {text}")
+    else:
+        await update.message.reply_text("❌ Please send a 4-digit number.")
+
+# ===== برنامه تلگرام =====
+application = ApplicationBuilder().token(BOT_TOKEN).build()
+application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
+
+# ===== استارت FastAPI =====
 @app.on_event("startup")
 async def on_startup():
-    # ثبت هندلر
-    application.add_handler(MessageHandler(filters.TEXT, handle_message))
-    # ثبت وبهوک در تلگرام
-    await application.bot.set_webhook(WEBHOOK_URL)
+    # ست کردن webhook
+    await bot.set_webhook(WEBHOOK_URL)
