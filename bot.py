@@ -1,34 +1,21 @@
 # bot.py
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from telegram import Update, Bot
+from telegram import Update
 from telegram.ext import ApplicationBuilder, ContextTypes, MessageHandler, filters
 
-# ====== تنظیمات ======
 BOT_TOKEN = "8495622135:AAEdNbSZIMU4nOlAEKCtCEWmsGDmwshQarU"
-WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"  # لینک برنامه شما روی Render
-# ====================
+WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"
 
 app = FastAPI()
-bot = Bot(token=BOT_TOKEN)
+last_number = "9800"
 
-# متغیر ذخیره عدد
-last_number = "5000"
-
-# ===== مسیر برای آردوینو =====
+# مسیر آردوینو
 @app.get("/get_number")
 async def get_number():
     return JSONResponse(content={"number": last_number})
 
-# ===== مسیر webhook تلگرام =====
-@app.post("/telegram_webhook")
-async def telegram_webhook(request: Request):
-    data = await request.json()
-    update = Update.de_json(data, bot)
-    await handle_message(update, ContextTypes.DEFAULT_TYPE(application=None))
-    return "ok"
-
-# ===== مدیریت پیام های دریافتی =====
+# مدیریت پیام های تلگرام
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global last_number
     text = update.message.text
@@ -39,14 +26,22 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         await update.message.reply_text("❌ Please send a 4-digit number.")
 
-# ===== برنامه تلگرام =====
-application = ApplicationBuilder().token(BOT_TOKEN).build()
+# مسیر Webhook تلگرام
+@app.post("/telegram_webhook")
+async def telegram_webhook(request: Request):
+    data = await request.json()
+    update = Update.de_json(data, application.bot)
+    await application.update_queue.put(update)  # اضافه کردن Update به صف Application
+    return "ok"
+
+# ساخت Application تلگرام
+application = ApplicationBuilder().token(BOT_TOKEN).webhook_url(WEBHOOK_URL).build()
 application.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-# ===== استارت FastAPI =====
+# هنگام استارت FastAPI، Webhook را ست می‌کنیم
 @app.on_event("startup")
 async def on_startup():
-    # ست کردن webhook
-    await bot.set_webhook(WEBHOOK_URL)
-
+    await application.initialize()
+    await application.start()
+    await application.bot.set_webhook(WEBHOOK_URL)
 
