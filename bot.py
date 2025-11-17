@@ -1,7 +1,6 @@
 from fastapi import FastAPI, Request
 from telegram import Update, Bot
 from telegram.ext import ContextTypes, MessageHandler, filters
-import os
 import asyncio
 
 app = FastAPI()
@@ -9,13 +8,9 @@ app = FastAPI()
 # --- Stores the last number received from Telegram ---
 last_number = "null"
 
-# --- Load bot token and webhook URL from environment variables ---
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
-WEBHOOK_URL = os.environ.get("WEBHOOK_URL")
-
-# Validate environment variables
-if not BOT_TOKEN or not WEBHOOK_URL:
-    raise ValueError("BOT_TOKEN and WEBHOOK_URL must be set as environment variables.")
+# --- Directly set your bot token and webhook URL here ---
+BOT_TOKEN = "8208471979:AAHXGkqSG1B2tfH_kwVv_evwKNxjhItV_K4"
+WEBHOOK_URL = "https://mb100.onrender.com/telegram_webhook"
 
 bot = Bot(token=BOT_TOKEN)
 
